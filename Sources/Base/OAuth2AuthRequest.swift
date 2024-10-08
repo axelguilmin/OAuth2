@@ -145,9 +145,16 @@ open class OAuth2AuthRequest {
 	*/
 	func asURLComponents() throws -> URLComponents {
 		let comp = URLComponents(url: url, resolvingAgainstBaseURL: false)
+
+#if OAUTH2_ALLOW_UNSECURE
+		guard var components = comp else {
+			throw OAuth2Error.generic("URLComponents is nil")
+		}
+#else
 		guard var components = comp, "https" == components.scheme else {
 			throw OAuth2Error.notUsingTLS
 		}
+#endif
 		if .GET == method && params.count > 0 {
 			components.percentEncodedQuery = params.percentEncodedQueryString()
 		}
